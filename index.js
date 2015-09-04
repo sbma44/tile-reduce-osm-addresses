@@ -4,7 +4,7 @@ var fs = require('fs');
 var queue = require('queue-async');
 
 var TARGET_ZOOM = 15;
-var usa = JSON.parse(fs.readFileSync('./usa.geojson'));
+var usa = JSON.parse(fs.readFileSync('./georgia.geojson'));
 var tiles = tilecover.geojson(usa.features[0].geometry, { min_zoom: TARGET_ZOOM-4, max_zoom: TARGET_ZOOM-4 });
 
 var q = queue(1);
