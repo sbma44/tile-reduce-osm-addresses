@@ -1,49 +1,38 @@
 var TileReduce = new require('tile-reduce');
-var tilecover = require('tile-cover');
-var fs = require('fs');
-var queue = require('queue-async');
 
-var TARGET_ZOOM = 15;
-var usa = JSON.parse(fs.readFileSync('./usa.geojson'));
-var tiles = tilecover.geojson(usa.features[0].geometry, { min_zoom: TARGET_ZOOM-4, max_zoom: TARGET_ZOOM-4 });
+var bboxAtlanta = [ -84.52, 33.61, -84.23, 33.93 ];
+var opts = {
+  zoom: 15,
+  tileLayers: [
+      {
+        name: 'osmdata',
+        mbtiles: '/mnt/data/latest.planet.mbtiles',
+        layers: ['osm']
+      }
+    ],
+  map: __dirname + '/fruit.js'
+};
 
-var q = queue(1);
+var totals = null;
 
-tiles.features.forEach(function(tile, i) {
-    q.defer(function(cb) {
-        console.error('processing tile ' + i + '/' + tiles.features.length);
-        runtile(tile, cb);
+var tilereduce = TileReduce(bboxAtlanta, opts);
+
+tilereduce.on('reduce', function(result) {
+  if (totals === null) {
+    totals = result;
+  }
+  else {
+    Object.keys(result).forEach(function(fruit) {
+      totals[fruit][0] += result[fruit][0];
+      totals[fruit][1] += result[fruit][1];
     });
+  }
 });
 
-function runtile(tile, callback) {
+tilereduce.on('end', function() {
+  Object.keys(totals).forEach(function(fruit) {
+    console.log(fruit + ': ' + totals[fruit][0] + ' found, ' + totals[fruit][1] + 'km');
+  });
+});
 
-    var bbox = [
-        tile.geometry.coordinates[0][0][0],
-        tile.geometry.coordinates[0][0][1],
-        tile.geometry.coordinates[0][2][0],
-        tile.geometry.coordinates[0][2][1]
-    ];
-
-    var opts = {
-      zoom: TARGET_ZOOM,
-      tileLayers: [
-          {
-            name: 'osmdata',
-            mbtiles: '/mnt/data/latest.planet.mbtiles',
-            layers: ['osm']
-          }
-        ],
-      map: __dirname+'/map.js'
-    };
-
-    var tilereduce = TileReduce(bbox, opts);
-
-    tilereduce.on('reduce', function(result){
-      if (result.length > 0)
-          console.log(result.map(JSON.stringify).join('\n').trim());
-    });
-    tilereduce.on('end', callback);
-
-    tilereduce.run();
-}
+tilereduce.run();
