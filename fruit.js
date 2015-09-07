@@ -14,10 +14,9 @@ module.exports = function (tileLayers, opts, done) {
     };
 
     var totalRoads = 0, totalRoadLength = 0;
-    tileLayers.osmdata.osm.features.forEach(function(feature)) {
+    tileLayers.osmdata.osm.features.forEach(function(feature) {
         if (feature.properties.highway && feature.properties.name) {
-            var roadLength = turf.lineDistance(feature.geometry, 'kilometers');
-
+            var roadLength = turf.lineDistance(feature, 'kilometers');
             Object.keys(fruitCount).forEach(function(fruit) {
                 if((new RegExp('\b' + fruit, 'i')).test(feature.properties.name)) {
                     fruitCount[fruit][0] += 1;
@@ -28,7 +27,7 @@ module.exports = function (tileLayers, opts, done) {
             totalRoads += 1;
             totalRoadLength += roadLength;
         }
-    }
+    });
 
     fruitCount.total = [totalRoads, totalRoadLength];
 
