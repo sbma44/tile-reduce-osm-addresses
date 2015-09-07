@@ -1,6 +1,7 @@
 var turf = require('turf');
 
 module.exports = function (tileLayers, opts, done) {
+
     var fruitCount = {
         apple: [0, 0],
         banana: [0, 0],
@@ -14,11 +15,13 @@ module.exports = function (tileLayers, opts, done) {
     };
 
     var totalRoads = 0, totalRoadLength = 0;
+
     tileLayers.osmdata.osm.features.forEach(function(feature) {
-        if (feature.properties.highway && feature.properties.name) {
+        if (feature.properties.highway && feature.properties.name && (feature.geometry.type === 'LineString')) {
             var roadLength = turf.lineDistance(feature, 'kilometers');
             Object.keys(fruitCount).forEach(function(fruit) {
-                if((new RegExp('\b' + fruit, 'i')).test(feature.properties.name)) {
+                var re = new RegExp('(^|\\s)' + fruit + '.*', 'i');
+                if(re.test(feature.properties.name)) {
                     fruitCount[fruit][0] += 1;
                     fruitCount[fruit][1] += roadLength;
                 }
