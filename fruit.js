@@ -3,15 +3,14 @@ var turf = require('turf');
 module.exports = function (tileLayers, opts, done) {
 
     var fruitCount = {
-        apple: [0, 0],
-        banana: [0, 0],
-        cherry: [0, 0],
-        grape: [0, 0],
-        lemon: [0, 0],
-        mango: [0, 0],
-        orange: [0, 0],
-        peach: [0, 0],
-        pear: [0, 0]
+        apple: ['🍎', 0, 0],
+        banana: ['🍌', 0, 0],
+        cherry: ['🍒', 0, 0],
+        grape: ['🍇', 0, 0],
+        lemon: ['🍋', 0, 0],
+        orange: ['🍊', 0, 0],
+        peach: ['🍑', 0, 0],
+        pear: ['🍐', 0, 0]
     };
 
     var totalRoads = 0, totalRoadLength = 0;
@@ -22,8 +21,8 @@ module.exports = function (tileLayers, opts, done) {
             Object.keys(fruitCount).forEach(function(fruit) {
                 var re = new RegExp('(^|\\s)' + fruit + '.*', 'i');
                 if(re.test(feature.properties.name)) {
-                    fruitCount[fruit][0] += 1;
-                    fruitCount[fruit][1] += roadLength;
+                    fruitCount[fruit][1] += 1;
+                    fruitCount[fruit][2] += roadLength;
                 }
             });
 
@@ -32,7 +31,7 @@ module.exports = function (tileLayers, opts, done) {
         }
     });
 
-    fruitCount.total = [totalRoads, totalRoadLength];
+    fruitCount.total = ['total', totalRoads, totalRoadLength];
 
     done(null, fruitCount);
 }
